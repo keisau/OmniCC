@@ -686,6 +686,13 @@ if SECRETS_ENABLED then
 
     local durations = setmetatable({}, {
         __index = function(self, text)
+            if (text == nil) then
+                return nil
+            end
+            if (issecretvalue(text)) then
+                return nil
+            end
+
             local value = parseDuration(text)
             self[text] = value
             return value
@@ -718,10 +725,13 @@ if SECRETS_ENABLED then
                     proxy.fontString = fontString
                 end
 
-                if fontString then
-                    local duration = durations[fontString:GetText() or ""]
-                    if duration > 0 then
-                        Cooldown.SetTimer(proxy.owner, GetTime(), duration, 1)
+                if fontString and not (issecretvalue(fontString)) then
+                    local text = fontString:GetText()
+                    if not issecretvalue(text) then
+                        local duration = durations[text]
+                        if duration > 0 then
+                            Cooldown.SetTimer(proxy.owner, GetTime(), duration, 1)
+                        end
                     end
                 end
             end
